@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0" />
+  <title>CS405 - Painting in 3D</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #151821;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      padding: 16px 24px;
+      background: #222633;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    #status {
+      margin-top: 8px;
+      color: #b8c1d1;
+      font-size: 14px;
+    }
+    .layout {
+      display: flex;
+      height: calc(100dvh - 107px);
+    }
+    canvas {
+      display: block;
+      flex: 1;
+      min-width: 0;
+      width: 0;
+    }
+    aside {
+      width: 340px;
+      padding: 20px;
+      background: #222633;
+      overflow-y: auto;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    h3 {
+      font-size: 14px;
+      margin-top: 24px;
+      color: #b8c1d1;
+    }
+    .control {
+      margin-bottom: 18px;
+    }
+    label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #8b9dff;
+    }
+    select {
+      width: 100%;
+      padding: 9px;
+      background: #34394b;
+      color: white;
+      border: 1px solid #555d75;
+      border-radius: 5px;
+    }
+    pre {
+      padding: 10px;
+      background: #151821;
+      font-size: 11px;
+      line-height: 1.5;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+    .active {
+      outline: 1px solid #8b9dff;
+    }
+    @media (max-width: 750px) {
+      .layout { flex-direction: column; height: auto; }
+      canvas { height: 50vh; width: 100%; flex: auto; }
+      aside { width: 100%; }
+    }
+    #performance, #gpu { color: #b8c1d1; font-size: 12px; }
+    #camera-info { white-space: pre-wrap; }
+    #webgpu-canvas {
+    touch-action: none;
+    cursor: grab;
+  }
+  #webgpu-canvas:active {
+    cursor: grabbing;
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CS405 - Transformations & 3D Scene</h1>
+    <div id="status">Initializing WebGPU…</div>
+    <output id="performance" aria-label="Frame statistics"></output>
+  </header>
+  <div class="layout">
+    <canvas id="webgpu-canvas"></canvas>
+    <aside>
+      <h2>Scene Mode</h2>
+      <div class="control">
+        <select id="scene-mode">
+          <option value="painting">Painting Scene - Ormanda Karaca</option>
+          <option value="demo">Transformations and Hierarchy</option>
+          <option value="trace">Painting and Contour</option>
+        </select>
+      </div>
+      <div class="control">
+        <button type="button" id="reset">Reset scene</button>
+        <label><span>Freeze animation</span><input type="checkbox" id="freeze"></label>
+        <label><span>Inspection camera</span><input type="checkbox" id="inspection"></label>
+        <label><span>Show contour and controls</span><input type="checkbox" id="show-trace" checked></label>
+        <span id="gpu"></span>
+      </div>
+      <pre id="camera-info"></pre>
+      <hr>
+      <div class="control">
+        <label style="justify-content:flex-start;gap:10px">
+          <input id="debug-axes" type="checkbox">
+          Show Scene Graph Axes
+        </label>
+      </div>
+      <hr>
+      <h2>Part C - Camera & Projection</h2>
+      <div class="control">
+        <label for="projection-mode">Projection Mode</label>
+        <select id="projection-mode">
+          <option value="perspective">Perspective</option>
+          <option value="orthographic">Orthographic</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="camera-yaw">Camera Yaw</label>
+        <input
+          id="camera-yaw"
+          type="range"
+          min="-180"
+          max="180"
+          value="0"
+          step="1"
+        >
+        <span id="camera-yaw-value">0°</span>
+      </div>
+      <div class="control">
+        <label for="camera-pitch">Camera Pitch</label>
+        <input
+          id="camera-pitch"
+          type="range"
+          min="-80"
+          max="80"
+          value="15"
+          step="1"
+        >
+        <span id="camera-pitch-value">15°</span>
+      </div>
+      <div class="control">
+        <label for="camera-distance">Camera Distance</label>
+        <input
+          id="camera-distance"
+          type="range"
+          min="3"
+          max="15"
+          value="7"
+          step="0.1"
+        >
+        <span id="camera-distance-value">7.0</span>
+      </div>
+      <h2>Part A - Transformations</h2>
+      <p style="font-size:13px;color:#b8c1d1">
+        Control the middle cube.
+      </p>
+      <div class="control">
+        <label>
+          Translation X
+          <span id="tx-value">0.0</span>
+        </label>
+        <input id="tx" type="range"
+               min="-2" max="2" step="0.1" value="0">
+      </div>
+      <div class="control">
+        <label>
+          Translation Y
+          <span id="ty-value">0.0</span>
+        </label>
+        <input id="ty" type="range"
+               min="-2" max="2" step="0.1" value="0">
+      </div>
+      <div class="control">
+        <label>
+          Translation Z
+          <span id="tz-value">0.0</span>
+        </label>
+        <input id="tz" type="range"
+               min="-2" max="2" step="0.1" value="0">
+      </div>
+      <div class="control">
+        <label>
+          Rotation Y
+          <span id="rotation-value">0°</span>
+        </label>
+        <input id="rotation" type="range"
+               min="0" max="360" step="1" value="30">
+      </div>
+      <div class="control">
+        <label>
+          Scale
+          <span id="scale-value">1.0</span>
+        </label>
+        <input id="scale" type="range"
+               min="0.2" max="2" step="0.1" value="1">
+      </div>
+      <h3>Matrix Composition Order</h3>
+      <select id="matrix-order">
+        <option value="TRS">T × R × S</option>
+        <option value="SRT">S × R × T</option>
+      </select>
+      <h3>T × R × S</h3>
+      <pre id="trs-matrix"></pre>
+      <h3>S × R × T</h3>
+      <pre id="srt-matrix"></pre>
+          <div>
+        <h3>Bezier Curve</h3>
+        <label for="curve-family">Curve family</label>
+        <select id="curve-family">
+          <option value="bezier">Piecewise Bézier</option>
+          <option value="catmull">Catmull–Rom</option>
+        </select>
+        <label for="curve-segment">de Casteljau segment</label>
+        <select id="curve-segment"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select>
+        <label for="curve-t"><span>de Casteljau t</span><output id="curve-t-value"></output></label>
+        <input id="curve-t" type="range" min="0" max="1" value="0.5" step="0.01">
+        <button id="export-curve" type="button">
+          Export Curve JSON
+        </button>
+      </div>
+    </aside>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
