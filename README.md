@@ -1,125 +1,113 @@
-# CS405 Project 1 — Painting in 3D
+# CS405 Project 1 – Painting in 3D
 
-A browser-based WebGPU application that combines 3D transformations, a hierarchical scene graph, camera projections and interactive curves with a painting-inspired scene.
+I created a WebGPU application using JavaScript for this project. I worked with 3D transformations, scene graphs, camera projections and curves, and combined them in a scene based on Şeker Ahmed Paşa's *Ormanda Karaca* painting.
 
-The reference artwork is **Şeker Ahmed Paşa's *Ormanda Karaca***. The application displays the painting as an image plane, builds a stylized 3D forest with a deer and lets users trace a contour over the artwork.
+I used the painting as a background and created a simple 3D forest with trees and a deer in front of it. I also traced the deer's contour using Bézier curves.
 
 ## Requirements
 
 - Node.js and npm
-- A browser and graphics device with WebGPU support
+- A browser that supports WebGPU
 
-## Setup and run
+## How to Run
 
-From the project directory:
+Open the project folder in VS Code and run these commands in the terminal:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173/`).
+Then open the local address shown in the terminal, usually `http://localhost:5173/`.
 
-To create and inspect a production build:
+To check the production build, run:
 
 ```bash
 npm run build
-npm run preview
 ```
 
-`npm.cmd` can be used in place of `npm` on Windows PowerShell if it blocks the npm script.
+On Windows PowerShell, I used `npm.cmd` instead of `npm` when script execution was blocked.
 
-## Scene modes
+## Scene Modes
 
-Select a mode using **Scene Mode** in the sidebar:
+I added three scene modes that can be selected from the sidebar.
 
-1. **Painting Scene – Ormanda Karaca:** a stylized 3D forest and deer in front of the painting.
-2. **Transformations and Hierarchy:** interactive cubes and hierarchical objects in front of the painting, for demonstrating transformations and scene graph behavior.
-3. **Painting and Contour:** the artwork with an editable curve tracing the deer contour.
+**Painting Scene – Ormanda Karaca:** This is the main scene where I placed low-poly trees and a deer in front of the painting.
 
-## Features by project part
+**Transformations and Hierarchy:** I used this mode to demonstrate transformations with cubes and parent-child relationships between objects.
 
-### Part A — Transformations
+**Painting and Contour:** This mode shows the painting and the curve I traced over the deer. The control points can be adjusted.
 
-- Translation along X, Y, and Z, rotation about Y and uniform scaling.
-- Switch between `T * R * S` and `S * R * T` composition orders.
-- View both transformation matrices in the interface.
+## Project Parts
 
-### Part B — Scene graph
+### Part A – Transformations
 
-- Parent–child transformations using `SceneNode`.
-- Optional local coordinate axes through **Show Scene Graph Axes**.
+I implemented translation, rotation and scaling using 4×4 matrices. The sliders let me change the position, rotation and scale of the cubes. I also added an option to compare TRS and SRT transformation orders and displayed their matrices in the sidebar.
 
-### Part C — Camera and projection
+### Part B – Scene Graph
 
-- Perspective and orthographic projections.
-- Camera yaw, pitch and distance controls.
-- Drag on the canvas to orbit or use the mouse wheel to zoom.
-- **Inspection camera** mode and camera information display.
+I created a `SceneNode` class to handle parent-child relationships. Each node has its own local transformation and its world transformation depends on its parent. I also added an option to display the coordinate axes.
 
-### Part D — Curves
+### Part C – Camera and Projection
 
-- Piecewise cubic Bezier curve with three segments.
-- Catmull–Rom curve option.
-- Adjustable de Casteljau parameter and segment selection.
-- Editable curve control points on the canvas.
-- **Show contour and controls** visibility toggle.
-- **Export Curve JSON** to save the current control points.
+I implemented perspective and orthographic projections. The camera can be controlled using the sliders or by dragging the mouse and scrolling to zoom. I also added an inspection camera and a frustum visualization.
 
-### Part E — Integration
+### Part D – Curves
 
-- Painting-based 3D scene with low-poly trees and a deer.
-- Scene mode selection, animation freeze and reset controls.
-- Frame-time and per-frame vertex-count readout.
+I used three connected cubic Bezier segments to trace the deer's contour in the painting. The control points can be moved with the mouse.
+
+I also implemented de Casteljau interpolation and a Catmull–Rom curve option. The sidebar lets me change the curve type, select a segment and adjust the interpolation parameter.
+
+The curve can be exported as a JSON file.
+
+### Part E – Final Scene
+
+I combined the different parts into one application. The main scene includes the painting, a 3D forest and a deer. I added controls to switch between scenes, reset the camera and pause animations.
+
+I also displayed the frame time and vertex count to compare the different scenes.
 
 ## Controls
 
-| Control | Action |
-| --- | --- |
-| Scene Mode | Change between the forest, hierarchy, and contour views |
-| Mouse drag on canvas | Orbit the camera or drag a curve control point when selected |
-| Mouse wheel | Adjust camera distance |
-| Projection Mode | Switch between perspective and orthographic |
-| Camera Yaw / Pitch / Distance | Set the camera position |
-| Translation / Rotation / Scale | Modify the transformation demonstration |
-| Matrix Composition Order | Choose TRS or SRT |
-| Curve family | Choose piecewise Bezier or Catmull–Rom |
-| de Casteljau segment / t | Select a segment and interpolation parameter |
-| Show contour and controls | Toggle the contour overlay |
-| Freeze animation | Pause animation |
-| Reset scene | Restore the initial scene and controls |
-| Export Curve JSON | Download the current curve control points |
+Most of the controls are in the sidebar. I can use them to:
 
-## Project structure
+- Switch between the three scene modes.
+- Change the camera position and projection type.
+- Adjust translation, rotation and scale.
+- Compare TRS and SRT matrices.
+- Show or hide the scene graph axes.
+- Change the curve type and edit its control points.
+- Adjust the de Casteljau parameter.
+- Export the curve as JSON.
+- Pause animations or reset the scene.
 
-```text
-Project1/
-├── assets/
-│   └── ormanda_karaca.jpeg
-├── src/
-│   ├── main.js                 # WebGPU initialization, scene and rendering
-│   ├── camera.js               # Camera, projection and frustum utilities
-│   ├── ui.js                   # Reset and performance readout
-│   ├── curves/bezier.js        # Bézier and Catmull–Rom operations
-│   ├── math/mat4.js            # Matrix and transform operations
-│   ├── render/basic.wgsl       # Basic vertex and fragment shaders
-│   ├── render/geometry.js      # Primitive geometry
-│   ├── render/painting.js      # Painting texture and image plane
-│   └── scene/SceneNode.js      # Hierarchical scene graph node
-├── curve.json                 # Initial normalized contour control points
-├── index.html                 # Application UI
-├── package.json
-└── README.md
-```
+I can also drag the canvas to rotate the camera and use the mouse wheel to zoom.
 
-`node_modules/` is installed by npm and `dist/` is generated by the build command. Both are ignored by Git.
+## Project Structure
 
-## Curve data
+I separated the code into different files to keep it organized.
 
-The initial contour is loaded from `curve.json` at startup. It contains normalized image-space control points (`normalized-image-top-left`) and segment indices. The JSON export command downloads the current curve data and it does not automatically overwrite the original `curve.json` file.
+- `src/main.js` contains the main rendering loop and connects the different parts of the application.
+- `src/math/` contains the matrix operations.
+- `src/scene/` contains the scene graph implementation.
+- `src/render/` contains the shaders, geometry and painting rendering code.
+- `src/curves/` contains the Bézier and Catmull–Rom functions.
+- `src/camera.js` contains the camera and projection calculations.
+- `src/ui.js` contains some of the UI and performance functions.
+
+I stored the painting in `assets/` and the contour control points in `curve.json`.
+
+## Curve JSON
+
+I saved the initial curve in `curve.json`. It contains 10 control points and 3 Bézier segments. The coordinates are normalized between 0 and 1, using the top-left corner of the painting as the origin.
+
+I checked the JSON format, control point coordinates and segment indices using Node.js.
+
+The application downloads a new JSON file with the current control points when I use the export button. It does not automatically change the original file.
 
 ## Notes
 
-- WebGPU availability depends on browser, operating system and GPU support.
-- The frame-time readout is based on animation-frame timestamps and isn't a direct GPU timestamp measurement.
-- The painting is used as a visual reference so the low-poly forest and deer are an interpretation.
+I developed and tested the application using WebGPU. It requires a compatible browser and GPU.
+
+The frame-time value shown in the application is based on animation frames, so it is not a direct measurement of GPU execution time.
+
+The 3D forest is my simplified interpretation of the painting rather than an exact recreation.
