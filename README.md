@@ -108,6 +108,6 @@ The application downloads a new JSON file with the current control points when I
 
 I developed and tested the application using WebGPU. It requires a compatible browser and GPU.
 
-The frame-time value shown in the application is based on animation frames, so it is not a direct measurement of GPU execution time.
+The frame-time value shown in the application is based on animation frames so it is not a direct measurement of GPU execution time.
 
 The 3D forest is my simplified interpretation of the painting rather than an exact recreation.
